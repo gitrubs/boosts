@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Jira Rich-Link Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.2.2
+// @version      1.3.0
 // @description  Adds a button to copy a Jira issue key, title, and link as rich text.
 // @author       gitrubs
 // @match        https://*.atlassian.net/*
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -51,30 +52,17 @@
 
         const button = document.createElement('button');
         button.id = 'jira-rich-copy-button';
+        button.className = 'boosts-dock-btn';
         button.innerText = 'Copy Rich Link';
 
-        // Floating fixed styles to bypass Jira's layout engine
-        button.style.position = 'fixed';
-        button.style.bottom = '1.5rem';
-        button.style.left = '1.5rem';
-        button.style.zIndex = '99999'; // Forces it on top of all Jira view layers
-
         // Clean Jira-like styling
-        button.style.backgroundColor = '#0052CC'; // Atlassian Blue
-        button.style.color = 'white';
-        button.style.border = 'none';
-        button.style.borderRadius = '3px';
-        button.style.padding = '0 16px';
-        button.style.fontSize = '14px';
-        button.style.fontWeight = '500';
-        button.style.cursor = 'pointer';
-        button.style.height = '40px';
-        button.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
-        button.style.display = 'inline-flex';
-        button.style.alignItems = 'center';
-        button.style.transition = 'background-color 0.1s ease';
-        button.style.borderRadius = '8px';
-        button.style.height = '48px';
+        Object.assign(button.style, {
+            backgroundColor: '#0052CC',
+            color: 'white',
+            height: '48px',
+            display: 'inline-flex',
+            alignItems: 'center',
+        });
 
         button.onmouseover = () => button.style.backgroundColor = '#0747A6';
         button.onmouseout = () => button.style.backgroundColor = '#0052CC';
@@ -126,7 +114,7 @@
             }
         });
 
-        document.body.appendChild(button);
+        BoostDock.mount(button, { order: BoostDock.ORDER.COPY });
     }
 
     // Run execution guards

@@ -1,11 +1,12 @@
 // ==UserScript==
 // @name         Cursor Review PR and Stack Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      3.2.1
+// @version      3.3.0
 // @description  Copies clean links for the current Cursor Review pull request or its full stack.
 // @author       gitrubs
 // @match        https://review.cursor.com/*
 // @match        https://*.review.cursor.com/*
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -141,49 +142,55 @@
         }, 2000);
     }
 
-    // --- Interface dos Botões Flutuantes ---
-    const container = document.createElement('div');
-    container.id = 'cursor-pr-copier-container';
-    container.style = `
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 99999;
-        display: flex;
-        gap: 8px;
-        background: rgba(15, 17, 23, 0.85);
-        padding: 6px;
-        border-radius: 8px;
-        backdrop-filter: blur(8px);
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    `;
+    function injectCopierButtons() {
+        if (document.getElementById('cursor-pr-copier-container')) return;
+        if (!document.body) return;
 
-    const createBtn = (label, onClick, defaultBg, hoverBg) => {
-        const b = document.createElement('button');
-        b.innerHTML = label;
-        b.style = `
-            padding: 8px 14px;
-            background-color: ${defaultBg};
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: transform 0.15s ease, background-color 0.15s ease;
-        `;
-        b.onmouseover = () => b.style.backgroundColor = hoverBg;
-        b.onmouseout = () => b.style.backgroundColor = defaultBg;
-        b.onclick = () => onClick(b);
-        return b;
-    };
+        const container = document.createElement('div');
+        container.id = 'cursor-pr-copier-container';
+        container.className = 'boosts-dock-group';
 
-    const btnPR = createBtn('🚀 Copiar PR', copyCurrentPR, '#2ea44f', '#2c974b');
-    const btnStack = createBtn('🥞 Copiar Stack', copyStackPRs, '#6f42c1', '#5a32a3');
+        const createBtn = (label, onClick, defaultBg, hoverBg) => {
+            const b = document.createElement('button');
+            b.innerHTML = label;
+            b.style = `
+                padding: 8px 14px;
+                background-color: ${defaultBg};
+                color: white;
+                border: none;
+                border-radius: 6px;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: transform 0.15s ease, background-color 0.15s ease;
+            `;
+            b.onmouseover = () => b.style.backgroundColor = hoverBg;
+            b.onmouseout = () => b.style.backgroundColor = defaultBg;
+            b.onclick = () => onClick(b);
+            return b;
+        };
 
-    container.appendChild(btnPR);
-    container.appendChild(btnStack);
-    document.body.appendChild(container);
+        const btnPR = createBtn('🚀 Copiar PR', copyCurrentPR, '#2ea44f', '#2c974b');
+        const btnStack = createBtn('🥞 Copiar Stack', copyStackPRs, '#6f42c1', '#5a32a3');
+
+        container.appendChild(btnPR);
+        container.appendChild(btnStack);
+        BoostDock.mount(container, { order: BoostDock.ORDER.COPY });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', injectCopierButtons);
+    } else {
+        injectCopierButtons();
+    }
+
+    const observer = new MutationObserver(() => {
+        if (!document.getElementById('cursor-pr-copier-container')) {
+            injectCopierButtons();
+        }
+    });
+    if (document.body) {
+        observer.observe(document.body, { childList: true, subtree: true });
+    }
 })();

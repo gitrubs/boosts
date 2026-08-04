@@ -47,6 +47,40 @@ Copy this metadata block to top of a new script:
 
 Customize `@name`, `@description`, and `@match`. Add another `@match` line for each supported URL pattern. Keep versions in `major.minor.patch` format and increment version whenever installed script changes.
 
+### Floating buttons (Boost Dock)
+
+Floating button boosts share a single bottom-right dock so multiple scripts on the same page stack instead of overlapping. Each script only needs to know about the dock, not the other buttons.
+
+Add this `@require` line to any new floating-button boost:
+
+```javascript
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
+```
+
+Mount your button (or button group) into the dock:
+
+```javascript
+const button = document.createElement('button');
+button.className = 'boosts-dock-btn'; // shared base styles
+// ... add your own colors, labels, click handlers
+
+BoostDock.mount(button, { order: BoostDock.ORDER.COPY });
+```
+
+When removing a button on SPA navigation, call `BoostDock.unmount(button)` instead of `button.remove()`.
+
+**Order presets** (lower numbers sit closer to the corner):
+
+| Preset | Value | Use for |
+| --- | --- | --- |
+| `BoostDock.ORDER.ACTION` | 0 | General actions |
+| `BoostDock.ORDER.COPY` | 10 | Copy-to-clipboard buttons |
+| `BoostDock.ORDER.NAV` | 20 | Navigation / open-in-other-site buttons |
+
+For multi-button groups (e.g. a row of two copy buttons), wrap them in a container with class `boosts-dock-group` and mount the container as a single dock child.
+
+Buttons injected into the host page UI (like the GitHub header) should **not** use Boost Dock.
+
 ### Automatic updates from GitHub
 
 For public repositories, add these lines before `// ==/UserScript==`, replacing path and filename:
