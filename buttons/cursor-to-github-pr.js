@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Open PR in GitHub from Cursor Review
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.0.2
+// @version      1.1.0
 // @description  Adds a button to open the current Cursor Review pull request in GitHub.
 // @author       gitrubs
 // @match        https://review.cursor.com/github/pr/*
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -15,30 +16,18 @@ function injectOpenPrButton() {
 
     const button = document.createElement('button');
     button.id = 'cursor-open-pr-btn';
+    button.className = 'boosts-dock-btn';
     button.innerText = '🐙 Open in GitHub';
 
     Object.assign(button.style, {
-      position: 'fixed',
-      bottom: '20px',
-      right: '20px',
       backgroundColor: '#24292e',
       color: '#ffffff',
-      border: 'none',
-      padding: '10px 16px',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      zIndex: '999999',
-      fontFamily: 'system-ui, sans-serif',
-      fontWeight: 'bold',
-      fontSize: '14px',
-      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-      transition: 'background-color 0.2s ease'
     });
 
     button.addEventListener('mouseenter', () => button.style.backgroundColor = '#2ea44f');
     button.addEventListener('mouseleave', () => button.style.backgroundColor = '#24292e');
 
-    document.body.appendChild(button);
+    BoostDock.mount(button, { order: BoostDock.ORDER.NAV });
 
     button.addEventListener('click', (event) => {
       event.preventDefault();

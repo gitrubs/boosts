@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         GitHub PR Rich-Text Copier and Shortcut
 // @namespace    https://github.com/gitrubs/boosts
-// @version      2.1.1
+// @version      2.2.0
 // @description  Copies a GitHub pull request as rich text using a button or Hyper+L shortcut.
 // @author       gitrubs
 // @match        https://github.com/*/*/pull/*
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -18,10 +19,6 @@
     const style = document.createElement('style');
     style.textContent = `
         #vm-gh-copy-floating-btn {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            z-index: 9999;
             padding: 10px 16px;
             font-size: 13px;
             font-weight: 600;
@@ -142,8 +139,7 @@
             executeCopy();
         });
 
-        // Append safely to the body context
-        document.body.appendChild(btn);
+        BoostDock.mount(btn, { order: BoostDock.ORDER.COPY });
     }
 
     // ==========================================
@@ -162,7 +158,7 @@
         } else {
             // Remove button if navigating away from a PR page to a standard repo page
             const btn = document.getElementById('vm-gh-copy-floating-btn');
-            if (btn) btn.remove();
+            if (btn) BoostDock.unmount(btn);
         }
     });
 

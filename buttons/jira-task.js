@@ -1,10 +1,11 @@
 // ==UserScript==
 // @name         Jira Task Link Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.0.2
+// @version      1.1.0
 // @description  Adds a button to copy the current Jira issue title and clean link as rich text.
 // @author       gitrubs
 // @match        https://*.atlassian.net/browse/*
+// @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
@@ -19,29 +20,16 @@ function injectJiraCopyButton() {
   // Cria o botão
   const button = document.createElement('button');
   button.id = 'arc-jira-copy-btn';
+  button.className = 'boosts-dock-btn';
   button.innerText = '🔗 Copy Jira Link';
 
-  // Estiliza o botão (Preto, flutuante no canto inferior direito)
+  // Estiliza o botão (Preto)
   Object.assign(button.style, {
-    position: 'fixed',
-    bottom: '20px',
-    right: '20px',
     backgroundColor: '#000000',
     color: '#ffffff',
-    border: 'none',
-    padding: '10px 16px',
-    borderRadius: '8px',
-    cursor: 'pointer',
-    zIndex: '999999', // Garante que fique por cima da interface do Jira
-    fontFamily: 'system-ui, sans-serif',
-    fontWeight: 'bold',
-    fontSize: '14px',
-    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
-    transition: 'background-color 0.2s ease'
   });
 
-  // Adiciona o botão à página
-  document.body.appendChild(button);
+  BoostDock.mount(button, { order: BoostDock.ORDER.COPY });
 
   // Lógica de clique do botão
   button.addEventListener('click', (event) => {
