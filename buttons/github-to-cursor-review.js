@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         Open GitHub PR in Cursor Review
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.1.1
+// @version      1.1.2
 // @description  Adds a button to open the current GitHub pull request in Cursor Review.
 // @author       gitrubs
 // @match        https://github.com/*/*/pull/*
@@ -19,7 +19,7 @@
 
         if (prMatch) {
             const [_, owner, repo, prNumber] = prMatch;
-            return `https://review.cursor.com/github/pr/${owner}/${repo}/${prNumber}`;
+            return `https://app.graphite.com/github/pr/${owner}/${repo}/${prNumber}`;
         }
         return null;
     }
