@@ -1,11 +1,10 @@
 // ==UserScript==
 // @name         Cursor Review PR and Stack Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      3.3.0
+// @version      3.3.1
 // @description  Copies clean links for the current Cursor Review pull request or its full stack.
 // @author       gitrubs
-// @match        https://review.cursor.com/*
-// @match        https://*.review.cursor.com/*
+// @match        https://app.graphite.com/github/pr/*
 // @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
@@ -21,7 +20,7 @@
 
         if (match) {
             const [, org, repo, prNum] = match;
-            return `https://review.cursor.com/github/pr/${org}/${repo}/${prNum}`;
+            return `https://app.graphite.com/github/pr/${org}/${repo}/${prNum}`;
         }
 
         return window.location.href.split('#')[0];

@@ -1,10 +1,10 @@
 // ==UserScript==
 // @name         Open PR in GitHub from Cursor Review
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.1.0
+// @version      1.1.1
 // @description  Adds a button to open the current Cursor Review pull request in GitHub.
 // @author       gitrubs
-// @match        https://review.cursor.com/github/pr/*
+// @match        https://app.graphite.com/github/pr/*
 // @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
