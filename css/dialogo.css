@@ -1,0 +1,42 @@
+/* Make the main page container a centered flexbox viewport */
+html, body {
+  display: flex !important;
+  justify-content: center !important;
+  align-content: center !important;
+  align-items: center !important;
+  min-height: 100vh !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #ffffff !important;
+}
+
+/* Ensure main fills space correctly without enforcing extra height */
+main.enterprise {
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Hide all top-level body elements except main */
+body > *:not(main) {
+  display: none !important;
+}
+
+/* Inside main, hide everything except #obras */
+main.enterprise > *:not(#obras) {
+  display: none !important;
+}
+
+/* Ensure #obras is centered with a comfortable max width */
+section#obras {
+  display: block !important;
+  visibility: visible !important;
+  width: 100% !important;
+  max-width: 1200px !important; /* Adjust if you want it wider/narrower */
+  margin: 0 auto !important;
+  padding: 20px !important;
+  box-sizing: border-box !important;
+}
