@@ -74,17 +74,17 @@ function injectCopyButton() {
       const prTitleEl = document.querySelector('.js-issue-title, bdi.js-issue-title, [data-testid="issue-title"]');
       const prNumber = window.location.pathname.match(/\/pull\/(\d+)/)?.[1];
 
-      let finalTitle = "";
+      let title = "";
       const prUrl = window.location.href.split('#')[0];
 
       if (prTitleEl) {
-        const title = prTitleEl.innerText.trim();
-        finalTitle = prNumber ? `${title} #${prNumber}` : title;
+        title = prTitleEl.innerText.trim();
       } else {
-        finalTitle = document.title.split(' · ')[0].replace('Pull Request #', '#');
+        title = document.title.split(' · ')[0];
       }
 
-      finalTitle = finalTitle.replace(/\s+by\s+.+$/i, '').trim();
+      title = title.replace(/\s+by\s+.+$/i, '').trim();
+      const finalTitle = prNumber ? `${title} #${prNumber}` : title;
       const emojiCode = "🚀";
 
       const teamReviews = getTeamReviews();
