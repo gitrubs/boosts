@@ -1,14 +1,50 @@
 // ==UserScript==
 // @name         GitHub PR Link Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.1.0
-// @description  Adds a button to copy the current GitHub pull request title and link as rich text.
+// @version      1.2.0
+// @description  Adds a button to copy the current GitHub pull request title, link, and team reviewers with their status as rich text.
 // @author       gitrubs
 // @match        https://github.com/*/*/pull/*
 // @require      https://raw.githubusercontent.com/gitrubs/boosts/refs/heads/main/lib/boost-dock.js
 // @grant        none
 // @run-at       document-idle
 // ==/UserScript==
+
+const REVIEW_STATUS = {
+  PENDING: '⚪',
+  APPROVED: '✅',
+  CHANGES_REQUESTED: '🔴',
+};
+
+function getReviewersSection() {
+  const heading = [...document.querySelectorAll('h2, h3, span, div')]
+    .find((el) => el.children.length === 0 && el.textContent.trim() === 'Reviewers');
+  return heading?.closest('.discussion-sidebar-item') ?? heading?.parentElement?.parentElement ?? null;
+}
+
+// Returns one { status, team } entry per requested team reviewer, e.g. { status: '⚪', team: '@app-team' }
+function getTeamReviews() {
+  const section = getReviewersSection();
+  if (!section) return [];
+
+  const seen = new Set();
+  const reviews = [];
+
+  section.querySelectorAll('a[data-hovercard-type="team"], a[href*="/orgs/"][href*="/teams/"]').forEach((link) => {
+    const slug = link.getAttribute('href').split('/teams/')[1]?.split(/[/?#]/)[0];
+    if (!slug || seen.has(slug)) return;
+    seen.add(slug);
+
+    const row = link.closest('li') ?? link.parentElement?.parentElement ?? link;
+    let status = REVIEW_STATUS.PENDING;
+    if (row.querySelector('.octicon-check')) status = REVIEW_STATUS.APPROVED;
+    else if (row.querySelector('.octicon-x, .octicon-file-diff')) status = REVIEW_STATUS.CHANGES_REQUESTED;
+
+    reviews.push({ status, team: `@${decodeURIComponent(slug)}` });
+  });
+
+  return reviews;
+}
 
 function injectCopyButton() {
     // 1. Evita duplicatas se o botão já estiver lá
@@ -53,8 +89,12 @@ function injectCopyButton() {
       finalTitle = finalTitle.replace(/\s+by\s+.+$/i, '').trim();
       const emojiCode = "🚀";
 
-      const plainText = `${emojiCode} ${finalTitle} (${prUrl})`;
-      const htmlText = `<span>${emojiCode}</span> <span><a href="${prUrl}">${finalTitle}</a></span>`;
+      const teamReviews = getTeamReviews();
+      const teamPlainText = teamReviews.map(({ status, team }) => `\n${status} ${team}`).join('');
+      const teamHtml = teamReviews.map(({ status, team }) => `<br><span>${status} ${team}</span>`).join('');
+
+      const plainText = `${emojiCode} ${finalTitle} (${prUrl})${teamPlainText}`;
+      const htmlText = `<span>${emojiCode}</span> <span><a href="${prUrl}">${finalTitle}</a></span>${teamHtml}`;
 
       const blobHtml = new Blob([htmlText], { type: "text/html" });
       const blobText = new Blob([plainText], { type: "text/plain" });
