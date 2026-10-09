@@ -91,8 +91,8 @@ function injectCopyButton() {
       const teamPlainText = teamReviews.map(({ status, team }) => `\n${status} ${team}`).join('');
       const teamHtml = teamReviews.map(({ status, team }) => `<br><span>${status} ${team}</span>`).join('');
 
-      const plainText = `${emojiCode} ${finalTitle} (${prUrl})${teamPlainText}`;
-      const htmlText = `<span>${emojiCode}</span> <span><a href="${prUrl}">${finalTitle}</a></span>${teamHtml}`;
+      const plainText = `[:rocket: ${finalTitle}](${prUrl})${teamPlainText}`;
+      const htmlText = `<a href="${prUrl}">${emojiCode} ${finalTitle}</a>${teamHtml}`;
 
       const blobHtml = new Blob([htmlText], { type: "text/html" });
       const blobText = new Blob([plainText], { type: "text/plain" });
