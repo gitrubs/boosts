@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         GitHub PR Link Copier
 // @namespace    https://github.com/gitrubs/boosts
-// @version      1.2.1
+// @version      1.4.0
 // @description  Adds a button to copy the current GitHub pull request title, link, and team reviewers with their status as rich text.
 // @author       gitrubs
 // @match        https://github.com/*/*/pull/*
@@ -14,10 +14,38 @@ const REVIEW_STATUS = {
   PENDING: '⚪',
   APPROVED: '✅',
   CHANGES_REQUESTED: '🔴',
+  COMMENTED: '💬',
 };
 
 function getReviewersSection() {
-  return document.querySelector('form[id^="pull-request-reviewers-form"]');
+  return document.querySelector('section[aria-label="Reviewers"]')
+    ?? document.querySelector('form[id^="pull-request-reviewers-form"]');
+}
+
+// Status of a single reviewer row from its indicator icons / tooltip text
+function getRowStatus(scope) {
+  const tips = [...scope.querySelectorAll('[data-component="Tooltip"]')].map((t) => t.textContent.toLowerCase());
+  if (scope.querySelector('.octicon-file-diff, .octicon-x') || tips.some((t) => /requested changes|changes requested/.test(t))) {
+    return REVIEW_STATUS.CHANGES_REQUESTED;
+  }
+  if (scope.querySelector('.octicon-check') || tips.some((t) => /approved/.test(t))) {
+    return REVIEW_STATUS.APPROVED;
+  }
+  if (scope.querySelector('.octicon-comment') || tips.some((t) => /left review comments|commented/.test(t))) {
+    return REVIEW_STATUS.COMMENTED;
+  }
+  return REVIEW_STATUS.PENDING;
+}
+
+// Team status = highest priority of its nested members' statuses (changes > approved > commented > pending)
+function getTeamStatus(link) {
+  const li = link.closest('li');
+  const members = [...(li?.querySelectorAll('.nestedMemberList__ARn9iU > li, ul[aria-label^="Members of"] > li') ?? [])];
+  const statuses = members.map(getRowStatus);
+  if (statuses.includes(REVIEW_STATUS.CHANGES_REQUESTED)) return REVIEW_STATUS.CHANGES_REQUESTED;
+  if (statuses.includes(REVIEW_STATUS.APPROVED)) return REVIEW_STATUS.APPROVED;
+  if (statuses.includes(REVIEW_STATUS.COMMENTED)) return REVIEW_STATUS.COMMENTED;
+  return REVIEW_STATUS.PENDING;
 }
 
 // Returns one { status, team } entry per requested team reviewer, e.g. { status: '⚪', team: '@app-team' }
@@ -34,10 +62,13 @@ function getTeamReviews() {
     if (!slug || seen.has(slug)) return;
     seen.add(slug);
 
-    const row = link.closest('.js-reviewer-team')?.parentElement ?? link.closest('li') ?? link.parentElement?.parentElement ?? link;
-    let status = REVIEW_STATUS.PENDING;
-    if (row.querySelector('.octicon-check')) status = REVIEW_STATUS.APPROVED;
-    else if (row.querySelector('.octicon-x, .octicon-file-diff')) status = REVIEW_STATUS.CHANGES_REQUESTED;
+    let status;
+    if (link.closest('li')?.querySelector('ul[aria-label^="Members of"]')) {
+      status = getTeamStatus(link);
+    } else {
+      const row = link.closest('.js-reviewer-team')?.parentElement ?? link.closest('li') ?? link.parentElement?.parentElement ?? link;
+      status = getRowStatus(row);
+    }
 
     reviews.push({ status, team: `@${decodeURIComponent(slug)}` });
   });
